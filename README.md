@@ -1,97 +1,108 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Service Desk Mobile
 
-# Getting Started
+**Service Desk Mobile** est un petit service permettant aux employés d'une entreprise de signaler des incidents ou de formuler des demandes d'assistance auprès de l'équipe technique.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Cas d'usage
 
-## Step 1: Start Metro
+Un employé peut créer un **ticket** lorsqu'il rencontre un problème, par exemple :
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- ordinateur qui ne démarre plus ;
+- problème d'accès à une application ;
+- imprimante indisponible ;
+- problème de connexion ;
+- demande d'installation d'un logiciel ;
+- incident sur un équipement ;
+- demande d'assistance générale.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Un ticket peut ensuite recevoir plusieurs **commentaires**, permettant de suivre les échanges et les actions réalisées par l'équipe technique.
 
-```sh
-# Using npm
-npm start
+## Stack technique
 
-# OR using Yarn
-yarn start
-```
+| Composant | Version |
+|---|---|
+|  | 8.5.0 |
+| Laravel | 13 |
+| Composer | 2.8.12 |
+| Base de données | SQLite |
+| Documentation API | Swagger (darkaonline/l5-swagger) |
 
-## Step 2: Build and run your app
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
 
-### Android
 
-```sh
-# Using npm
-npm run android
 
-# OR using Yarn
-yarn android
-```
 
-### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
 
-```sh
-bundle install
-```
+## Mes Composantes et ecrans
+1. Les Composants Réutilisables (Shared Components)
+Boutons & Actions (Buttons)
 
-Then, and every time you update your native dependencies, run:
+PrimaryButton : Le bouton bleu principal (ex: "Se connecter", "Créer le ticket").
 
-```sh
-bundle exec pod install
-```
+OutlinedButton : Le bouton avec bordure et fond transparent (ex: "Connexion avec empreinte").
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+TextLink : Les liens cliquables textuels (ex: "Mot de passe oublié ?", "Voir tout").
 
-```sh
-# Using npm
-npm run ios
+IconButton : Un bouton circulaire ou simple contenant uniquement une icône (ex: retour, cloche, réglages, options kebab).
 
-# OR using Yarn
-yarn ios
-```
+FloatingActionButton (FAB) : Le gros bouton "+" central de la barre de navigation.
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Champs de saisie (Inputs)
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+TextInputField : Champ de texte standard, avec support pour icône à gauche (email, cadenas) et action à droite (œil pour le mot de passe).
 
-## Step 3: Modify your app
+TextAreaField : Champ de texte multiligne (ex: pour la description du ticket).
 
-Now that you have successfully run the app, let's make changes!
+SearchInput : Barre de recherche avec icône loupe et potentiellement icône filtre.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+SelectDropdown : Champ de sélection (ex: "Catégorie").
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+CheckboxItem : Case à cocher avec son label ("Se souvenir de moi").
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+SegmentedControl : Le sélecteur de priorité en ligne (Basse, Moyenne, Haute, Urgente) qui agit comme des radio buttons stylisés.
 
-## Congratulations! :tada:
+FileUploadArea : La zone d'ajout de pièces jointes (pointillés + icône).
 
-You've successfully run and modified your React Native App. :partying_face:
+Affichage de données (Data Display)
 
-### Now what?
+TicketListItem : La carte rectangulaire affichant le résumé d'un ticket (icône, ID, titre, date et statut). C'est le composant le plus réutilisé de l'app.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+StatusBadge : La petite pilule colorée indiquant l'état (Ouvert en rouge, En cours en jaune, Résolu en vert, Fermé en gris).
 
-# Troubleshooting
+StatCard : Les 4 petits blocs carrés du dashboard (Mes tickets, Ouverts, etc.).
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+InfoRow : L'affichage clé/valeur pour les détails (ex: "Employé" / "Afi Kossi").
 
-# Learn More
+CommentBubble : Le bloc de message dans le chat, avec gestion du style selon si c'est l'utilisateur ou le support (droite/gauche, bleu/gris).
 
-To learn more about React Native, take a look at the following resources:
+MenuItem : La ligne cliquable du profil avec icône à gauche, texte et chevron à droite.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Avatar : L'image de profil ronde ou les initiales ("AK").
+
+Layout & Navigation
+
+ScreenHeader : L'en-tête de page avec le titre au centre et des emplacements pour le bouton retour à gauche et des actions à droite.
+
+BottomTabBar : La barre de navigation du bas (Accueil, Tickets, FAB, Notifications, Profil).
+
+TabsHeader : Les onglets de filtrage horizontaux (Tous, Ouverts, En cours, Résolus).
+
+2. Les Écrans (Screens)
+Voici les 8 écrans de ton application :
+
+SplashScreen : L'écran de chargement initial.
+
+LoginScreen : L'écran de connexion.
+
+HomeScreen : Le tableau de bord principal.
+
+TicketListScreen : L'historique et la recherche de tickets.
+
+NewTicketScreen : Le formulaire de création.
+
+TicketDetailsScreen : L'affichage complet d'un ticket.
+
+CommentsScreen : Le fil de discussion d'un ticket.
+
+ProfileScreen : Les paramètres et infos utilisateur.
