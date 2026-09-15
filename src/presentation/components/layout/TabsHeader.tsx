@@ -1,14 +1,84 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React from 'react';
+import {
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
+import { COLORS } from '../../../constants/constantColors';
 
-const TabsHeader = () => {
-  return (
-    <View>
-      <Text>TabsHeader</Text>
-    </View>
-  )
+export interface FilterTab {
+  key: string;
+  label: string;
+  count?: number;
 }
 
-export default TabsHeader
+interface TabsHeaderProps {
+  tabs: FilterTab[];
+  activeKey: string;
+  onTabPress: (key: string) => void;
+  style?: StyleProp<ViewStyle>;
+}
 
-const styles = StyleSheet.create({})
+/**
+ * Onglets de filtrage horizontaux avec compteur (ex: "Tous (5)").
+ * L'onglet actif : texte foncé + gras + soulignement. Les autres restent gris.
+ * ScrollView horizontal pour rester utilisable si la liste de filtres s'allonge.
+ */
+const TabsHeader: React.FC<TabsHeaderProps> = ({ tabs, activeKey, onTabPress, style }) => {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={style}
+      contentContainerStyle={styles.container}
+    >
+      {tabs.map((tab) => {
+        const isActive = tab.key === activeKey;
+        return (
+          <TouchableOpacity
+            key={tab.key}
+            onPress={() => onTabPress(tab.key)}
+            activeOpacity={0.7}
+            style={[styles.tab, isActive && styles.tabActive]}
+          >
+            <Text style={[styles.label, isActive && styles.labelActive]}>
+              {tab.label}
+              {tab.count !== undefined ? ` (${tab.count})` : ''}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  tab: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: COLORS.textPrimary,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.textMuted,
+  },
+  labelActive: {
+    color: COLORS.textPrimary,
+    fontWeight: '700',
+  },
+});
+
+export default TabsHeader;
