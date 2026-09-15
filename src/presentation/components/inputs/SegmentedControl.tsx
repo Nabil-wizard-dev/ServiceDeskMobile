@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   pill: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 10,
   },
   label: {
     fontSize: 13,

@@ -31,10 +31,138 @@ import Feather from 'react-native-vector-icons/Feather';
 import { COLORS } from './src/constants/constantColors';
 import TicketDetailsScreen from './src/presentation/screens/Home/TicketDetailsScreen';
 
+import {
+  createBottomTabNavigator,
+  BottomTabBarProps as NavigationTabBarProps,
+} from '@react-navigation/bottom-tabs';
+
+import BottomTabBar from './src/presentation/components/layout/BottomTabBar';
+
 export type RootStackParamList = {
   Home: undefined;
   Form: { todoId?: string } | undefined;
+  Login: undefined;
+  Profile: undefined;
+  Details: undefined;
+  NewTicket: undefined;
+  Charging: undefined;
+  TicketList: undefined;
+  Comments:undefined;
 };
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function CustomTabBar({ state, navigation }: NavigationTabBarProps) {
+  const tabs = [
+    {
+      key: 'Home',
+      label: 'Accueil',
+      icon: (color: string) => <Feather name="home" size={20} color={color} />,
+    },
+    {
+      key: 'TicketList',
+      label: 'Tickets',
+      icon: (color: string) => (
+        <Feather name="file-text" size={20} color={color} />
+      ),
+    },
+    {
+      key: 'Notifications',
+      label: 'Notifications',
+      icon: (color: string) => <Feather name="bell" size={20} color={color} />,
+    },
+    {
+      key: 'Profile',
+      label: 'Profil',
+      icon: (color: string) => <Feather name="user" size={20} color={color} />,
+    },
+  ];
+
+  return (
+    <BottomTabBar
+      tabs={tabs}
+      activeKey={state.routes[state.index].name}
+      onTabPress={key => navigation.navigate(key)}
+      onFabPress={() => {
+        navigation.getParent()?.navigate('NewTicket' as never);
+      }}
+    />
+  );
+}
+
+function MainTabs() {
+  // const navigation =
+  //   useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: true,
+      }}
+      tabBar={props => <CustomTabBar {...props} />}
+    >
+      {/* page d'acceuil */}
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          header: () => (
+            <ScreenHeader
+              leftComponent={<Avatar name="Afi Kossi" size={38} />}
+              rightComponent={
+                <IconButton
+                  variant="plain"
+                  icon={
+                    <Feather name="bell" size={20} color={COLORS.textPrimary} />
+                  }
+                  onPress={() => {}}
+                />
+              }
+            />
+          ),
+        }}
+      />
+      {/* profile */}
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          header: () => (
+            <ScreenHeader
+              title="Mon profil"
+              rightComponent={
+                <IconButton
+                  icon={
+                    <Feather
+                      name="settings"
+                      size={18}
+                      color={COLORS.textPrimary}
+                    />
+                  }
+                  onPress={() => {}}
+                />
+              }
+            />
+          ),
+        }}
+      />
+      {/* liste de Ticket */}
+      <Tab.Screen
+        name="TicketList"
+        component={TicketListScreen}
+        options={({ navigation }) => ({
+          header: () => (
+            <ScreenHeader
+              title="Mes tickets"
+              showBackButton
+              onBackPress={() => navigation.goBack()}
+            />
+          ),
+        })}
+      />
+    </Tab.Navigator>
+  );
+}
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -49,17 +177,13 @@ function App() {
 
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
-
-  const Stack = createNativeStackNavigator();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  // const navigation =
+  //   useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
     <View style={styles.container}>
-      
-
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
+        <Stack.Navigator initialRouteName="MainTabs">
           <Stack.Screen name="Charging" component={ChargingScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen
@@ -67,74 +191,19 @@ function AppContent() {
             component={LoginScreen}
             options={{ headerShown: false }}
           />
-          {/* page d'acceuil */}
+
+          {/* Groupe qui possède la BottomNavBar */}
           <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{
-              header: () => (
-                <ScreenHeader
-                  leftComponent={<Avatar name="Afi Kossi" size={32} />}
-                  rightComponent={
-                    <IconButton
-                      variant="plain"
-                      icon={
-                        <Feather
-                          name="bell"
-                          size={20}
-                          color={COLORS.textPrimary}
-                        />
-                      }
-                      onPress={() => {}}
-                    />
-                  }
-                />
-              ),
-            }}
+            name="MainTabs"
+            component={MainTabs}
+            options={{ headerShown: false }}
           />
-          {/* profile */}
-          <Stack.Screen
-            name="Profile"
-            component={ProfileScreen}
-            options={{
-              header: () => (
-                <ScreenHeader
-                  title="Mon profil"
-                  rightComponent={
-                    <IconButton
-                      icon={
-                        <Feather
-                          name="settings"
-                          size={18}
-                          color={COLORS.textPrimary}
-                        />
-                      }
-                      onPress={() => {}}
-                    />
-                  }
-                />
-              ),
-            }}
-          />
-          {/* liste de Ticket */}
-          <Stack.Screen
-            name="Ticket Liste"
-            component={TicketListScreen}
-            options={{
-              header: () => (
-                <ScreenHeader
-                  title="Mes tickets"
-                  showBackButton
-                  onBackPress={() => navigation.goBack()}
-                />
-              ),
-            }}
-          />
+
           {/* creer un ticket */}
           <Stack.Screen
-            name="New Ticket"
+            name="NewTicket"
             component={NewTicketScreen}
-            options={{
+            options={({ navigation})=>({
               header: () => (
                 <ScreenHeader
                   title="Nouveau Ticket"
@@ -142,13 +211,13 @@ function AppContent() {
                   onBackPress={() => navigation.goBack()}
                 />
               ),
-            }}
+            })}
           />
           {/* les commentaires */}
           <Stack.Screen
             name="Comments"
             component={CommentsScreen}
-            options={{
+            options={({ navigation})=>({
               header: () => (
                 <ScreenHeader
                   title="Commentaires"
@@ -156,13 +225,13 @@ function AppContent() {
                   onBackPress={() => navigation.goBack()}
                 />
               ),
-            }}
+            })}
           />
           {/* details ticket */}
           <Stack.Screen
             name="Details"
             component={TicketDetailsScreen}
-            options={{
+            options={({navigation})=>({
               header: () => (
                 // Retour + titre + kebab menu
                 <ScreenHeader
@@ -179,12 +248,12 @@ function AppContent() {
                           color={COLORS.textPrimary}
                         />
                       }
-                      onPress={()=>{}}
+                      onPress={() => {}}
                     />
                   }
                 />
               ),
-            }}
+            })}
           />
         </Stack.Navigator>
       </NavigationContainer>

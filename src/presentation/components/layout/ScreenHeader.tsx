@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { COLORS } from '../../../constants/constantColors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ScreenHeaderProps {
   title?: string;
@@ -37,6 +38,9 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   rightComponent,
   style,
 }) => {
+
+  const safeAreaInsets = useSafeAreaInsets();
+  
   const renderLeft = () => {
     if (leftComponent) return leftComponent;
     if (showBackButton) {
@@ -49,11 +53,13 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         </TouchableOpacity>
       );
     }
+
+    
     return null;
   };
 
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, {marginTop: safeAreaInsets.top,height: 22+safeAreaInsets.top,backgroundColor:'red'},style]}>
       <View style={styles.side}>{renderLeft()}</View>
 
       <View style={styles.titleWrapper} pointerEvents="none">
@@ -76,6 +82,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 52,
     paddingHorizontal: 16,
+    
   },
   side: {
     minWidth: 32,
