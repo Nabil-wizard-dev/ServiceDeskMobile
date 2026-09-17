@@ -1,10 +1,19 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SearchInput from '../../components/inputs/SearchInput';
 import TabsHeader, { FilterTab } from '../../components/layout/TabsHeader';
 import TicketListItem from '../../components/dataDisplay/TicketListItem';
+import { Ticket } from '../../../domain/entities/Ticket';
+import { TicketList } from '../../../domain/usecases/ticket/TicketList';
+import { RootStackParamList } from '../../../../App';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+
 
 const TicketListScreen = () => {
+  // la navigation
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const FILTER_TABS: FilterTab[] = [
     { key: 'tous', label: 'Tous', count: 5 },
     { key: 'ouverts', label: 'Ouverts', count: 2 },
@@ -14,6 +23,23 @@ const TicketListScreen = () => {
 
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('tous');
+
+  useEffect(()=>{
+    TicketList().then((response)=>{
+      setTickets(response)
+    })
+  },[])
+
+  // const toDetails =  async(id:string)=>{
+  //   navigation.navigate('Details')
+
+  // }
+
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
+
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,14 +63,14 @@ const TicketListScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       >
-        {Array.from({ length: 10 }).map((_, index) => (
+        {tickets.map((ticket) => (
           <TicketListItem
-            key={index}
-            ticketId={`TCK-2025-001${index + 1}`}
-            title="Problème d'accès au VPN"
-            status="en_cours"
+            key={ticket.reference}
+            ticketId={ticket.reference}
+            title={ticket.subject}
+            status={ticket.status ?? 'in_progress'}
             date="24 août 2025 - 10:30"
-            onPress={() => console.log(`Pressed ticket ${index}`)}
+            onPress={() => navigation.navigate('Details',{ticketId:ticket.id})}
           />
         ))}
       </ScrollView>
@@ -64,7 +90,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
   },
-  tabsContainer: {
+  tabsContainer: { 
     paddingHorizontal: 20,
     marginBottom: 8,
   },

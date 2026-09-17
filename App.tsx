@@ -13,7 +13,7 @@ import {
 } from 'react-native-safe-area-context';
 import ChargingScreen from './src/presentation/screens/ChargingScreen';
 import LoginScreen from './src/presentation/screens/auth/LoginScreen';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, NavigatorScreenParams, useNavigation } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
@@ -38,16 +38,20 @@ import {
 
 import BottomTabBar from './src/presentation/components/layout/BottomTabBar';
 
-export type RootStackParamList = {
-  Home: undefined;
-  Form: { todoId?: string } | undefined;
-  Login: undefined;
+export type MainTabsParamList = {
+  TicketList: undefined;
   Profile: undefined;
-  Details: undefined;
+  Home: undefined; // Déplacez ici les écrans qui sont réellement des onglets
+};
+
+export type RootStackParamList = {
+  Form: { todoId?: string } | undefined;
+  MainTabs: NavigatorScreenParams<MainTabsParamList>; 
+  Login: undefined;
+  Details: {ticketId?:string}|undefined;
   NewTicket: undefined;
   Charging: undefined;
-  TicketList: undefined;
-  Comments:undefined;
+  Comments:{ticketId?:string}|undefined;
 };
 
 const Stack = createNativeStackNavigator();

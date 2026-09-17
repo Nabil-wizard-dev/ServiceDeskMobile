@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { COLORS } from '../../../constants/constantColors';
-import StatusBadge, { TicketStatus } from '../layout/StatusBadge';
+import StatusBadge from '../layout/StatusBadge';
+import { TicketStatus } from '../../../domain/entities/Ticket';
 
 interface TicketListItemProps {
   ticketId: string;

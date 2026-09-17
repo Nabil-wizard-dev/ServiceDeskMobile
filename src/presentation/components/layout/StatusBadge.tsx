@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { COLORS } from '../../../constants/constantColors';
+import { TicketStatus } from '../../../domain/entities/Ticket'
 
-export type TicketStatus = 'ouvert' | 'en_cours' | 'resolu' | 'ferme';
 
 interface StatusBadgeProps {
   status: TicketStatus;
@@ -15,10 +15,10 @@ const STATUS_CONFIG: Record<
   TicketStatus,
   { label: string; color: string; backgroundColor: string }
 > = {
-  ouvert: { label: 'Ouvert', color: COLORS.error, backgroundColor: COLORS.errorLight },
-  en_cours: { label: 'En cours', color: COLORS.warning, backgroundColor: COLORS.warningLight },
-  resolu: { label: 'Résolu', color: COLORS.success, backgroundColor: COLORS.successLight },
-  ferme: { label: 'Fermé', color: COLORS.textSecondary, backgroundColor: COLORS.surfaceSecondary },
+  open: { label: 'Ouvert', color: COLORS.error, backgroundColor: COLORS.errorLight },
+  in_progress: { label: 'En cours', color: COLORS.warning, backgroundColor: COLORS.warningLight },
+  resolved: { label: 'Résolu', color: COLORS.success, backgroundColor: COLORS.successLight },
+  closed: { label: 'Fermé', color: COLORS.textSecondary, backgroundColor: COLORS.surfaceSecondary },
 };
 
 /**
@@ -27,7 +27,7 @@ const STATUS_CONFIG: Record<
  * purement informatif (pas cliquable).
  */
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, style }) => {
-  const config = STATUS_CONFIG[status];
+  const config = STATUS_CONFIG[status]  || { backgroundColor: '#e312eb' };
 
   return (
     <View style={[styles.badge, { backgroundColor: config.backgroundColor }, style]}>

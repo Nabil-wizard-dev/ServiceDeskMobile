@@ -77,17 +77,17 @@ const HomeScreen = () => {
           <TicketListItem
             ticketId="TCK-2025-0012"
             title="Problème d'accès au VPN"
-            status="en_cours"
+            status="open"
           />
           <TicketListItem
             ticketId="TCK-2025-0011"
             title="Imprimante indisponible"
-            status="ouvert"
+            status="in_progress"
           />
           <TicketListItem
             ticketId="TCK-2025-0010"
             title="Installation logiciel"
-            status="resolu"
+            status="closed"
           />
         </View>
       </ScrollView>

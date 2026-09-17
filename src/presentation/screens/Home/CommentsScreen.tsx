@@ -1,13 +1,59 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import TextInputField from '../../components/inputs/TextInputField';
 import IconButton from '../../components/buttons/IconButton';
 import { COLORS } from '../../../constants/constantColors';
 import Feather from 'react-native-vector-icons/Feather';
 import Avatar from '../../components/dataDisplay/Avatar';
+import { Comment, CreateComment } from '../../../domain/entities/comment';
 import CommentBubble from '../../components/dataDisplay/CommentBubble';
+import { CommentsByTicket } from '../../../domain/usecases/comment/CommentsBuyTicket';
+import { CreateTicket } from '../../../domain/usecases/ticket/CreateTicket';
+import { AddComment } from '../../../domain/usecases/comment/AddComment';
+import { RouteProp, useRoute } from '@react-navigation/native';
+
+type CommentsRouteProp = RouteProp<
+  { Comments: { ticketId?: string } | undefined },
+  'Comments'
+>;
 
 const CommentsScreen = () => {
+  //recup la route
+  const route = useRoute<CommentsRouteProp>();
+
+  // 3. Extraction sécurisée du ticketId (sera string ou undefined)
+  const ticketId = route.params?.ticketId;
+
+  //
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [text, setText] = useState('');
+  const [comment, setComment] = useState('');
+
+  useEffect(() => {
+    CommentsByTicket(ticketId as string).then(response => {
+      setComments(response);
+    });
+  }, []);
+
+  //
+
+  // pour la creation
+  const handleAdd = async (newComment: CreateComment) => {
+    const created = await AddComment(ticketId as string, newComment);
+    // Tu ajoutes à la liste existante
+    setComments(prev => [created, ...prev]);
+  };
+
+  //pour l'envoie
+  const handleSend = () => {
+    if (!text.trim()) return;
+    handleAdd({
+      message: text,
+      employee_id: '01m1k8qewyes6ntzc3bmdczaj6',
+    });
+    setText('');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Zone des commentaires scrollable */}
@@ -16,7 +62,7 @@ const CommentsScreen = () => {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.commentRow}>
-          <Avatar />
+          <Avatar name="support it" />
           <View style={styles.bubbleWrapper}>
             <CommentBubble
               senderName="Support IT"
@@ -25,6 +71,19 @@ const CommentsScreen = () => {
             />
           </View>
         </View>
+
+        {comments.map(comment => (
+          <View style={styles.commentRow}>
+            <Avatar name={comment.employee.fullName} />
+            <View style={styles.bubbleWrapper}>
+              <CommentBubble
+                senderName={comment.employee.fullName}
+                timestamp={comment.createdAt.toLocaleString()}
+                message={comment.message}
+              />
+            </View>
+          </View>
+        ))}
       </ScrollView>
 
       {/* Zone de saisie fixe en bas */}
@@ -34,15 +93,15 @@ const CommentsScreen = () => {
             leftIcon="link"
             placeholder="Écrire un commentaire..."
             keyboardType="default"
+            value={text}
+            onChangeText={setText}
             autoCapitalize="sentences"
           />
         </View>
         <IconButton
           variant="plain"
-          icon={
-            <Feather name="send" size={20} color={COLORS.primary} />
-          }
-          onPress={() => {}}
+          icon={<Feather name="send" size={20} color={COLORS.primary} />}
+          onPress={handleSend}
         />
       </View>
     </SafeAreaView>

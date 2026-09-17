@@ -1,4 +1,11 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React, { useState } from 'react';
 import TextInputField from '../../components/inputs/TextInputField';
 import TextAreaField from '../../components/inputs/TextAreaField';
@@ -9,30 +16,39 @@ import { COLORS } from '../../../constants/constantColors';
 import SelectDropdown from '../../components/inputs/SelectedDropDown';
 import FileUploadArea from '../../components/inputs/FileUploadArea';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
+import {
+  AddTicket,
+  Ticket,
+  TicketPriorityEnum,
+} from '../../../domain/entities/Ticket';
+import { CreateTicket } from '../../../domain/usecases/ticket/CreateTicket';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../../App';
 
 const NewTicketScreen = () => {
   const PRIORITY_OPTIONS: SegmentedOption[] = [
     {
       label: 'Basse',
-      value: 'basse',
+      value: TicketPriorityEnum.LOW,
       color: COLORS.success,
       backgroundColor: COLORS.successLight,
     },
     {
       label: 'Moyenne',
-      value: 'moyenne',
+      value: TicketPriorityEnum.MEDIUM,
       color: COLORS.info,
       backgroundColor: COLORS.infoLight,
     },
     {
       label: 'Haute',
-      value: 'haute',
+      value: TicketPriorityEnum.HIGH,
       color: COLORS.warning,
       backgroundColor: COLORS.warningLight,
     },
     {
       label: 'Urgente',
-      value: 'urgente',
+      value: TicketPriorityEnum.URGENT,
       color: COLORS.error,
       backgroundColor: COLORS.errorLight,
     },
@@ -43,10 +59,54 @@ const NewTicketScreen = () => {
     { label: 'Eau & Assainissement', value: 'eau' },
     { label: 'Électricité', value: 'electricite' },
   ];
-
+  //pour le formulaire
+  const [subject, setSubject] = useState('');
+  const [tickets, setTickets] = useState<Ticket[]>();
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('moyenne');
+  const [priority, setPriority] = useState<TicketPriorityEnum>();
   const [category, setCategory] = useState<string | null>(null);
+
+  // la navigation
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  // appel su usecase
+  const handleAdd = async (newTicket: AddTicket) => {
+    const createdTicket = await CreateTicket(newTicket);
+    return createdTicket;
+  };
+
+  //pour l'envoi
+  // --- handleSend : Validation, préparation des données et réinitialisation ---
+  const handleSend = async () => {
+    // 1. Validation des champs obligatoires (Sujet et Description ont des *)
+    if (!subject || !description) {
+      Alert.alert(
+        'Veuillez remplir les champs obligatoires (Sujet et Description).',
+      );
+      console.log({"sub":subject,'descript': description, priority});
+      return;
+    }
+     console.log(subject, description, priority);
+    await handleAdd({
+      subject: subject,
+      description: description,
+      priority: priority,
+      employee_id: '01m1k8qewyes6ntzc3bmdczaj6',
+    });
+    console.log(subject, description, priority);
+
+    setSubject('');
+    setDescription('');
+    setCategory(null);
+    setPriority(TicketPriorityEnum.MEDIUM);
+
+    Alert.alert('Ticket créé avec succès !');
+    // navigation.navigate('TicketList')
+    navigation.navigate('MainTabs', {
+  screen: 'TicketList',
+});
+    
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -60,6 +120,8 @@ const NewTicketScreen = () => {
             placeholder="Ex : Impossible de se connecter au VPN"
             keyboardType="default"
             autoCapitalize="sentences"
+             onChangeText={setSubject}
+             value={subject}
           />
         </View>
 
@@ -77,8 +139,8 @@ const NewTicketScreen = () => {
           <Text style={styles.label}>Priorité *</Text>
           <SegmentedControl
             options={PRIORITY_OPTIONS}
-            value={priority}
-            onChange={setPriority}
+            value={(priority) as string}
+            onChange={(val) => setPriority(val as TicketPriorityEnum)}
           />
         </View>
 
@@ -104,7 +166,7 @@ const NewTicketScreen = () => {
 
         {/* Bouton de soumission */}
         <View style={styles.buttonContainer}>
-          <PrimaryButton title="Créer le ticket" onPress={() => {}} />
+          <PrimaryButton title="Créer le ticket" onPress={handleSend} />
         </View>
       </ScrollView>
     </SafeAreaView>

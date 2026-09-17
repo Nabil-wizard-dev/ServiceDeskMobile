@@ -78,7 +78,7 @@ const LoginScreen = () => {
 
           <PrimaryButton
             title="Se connecter"
-            onPress={()=>navigation.navigate('Home')}
+            onPress={()=>navigation.navigate('MainTabs',{screen:'Home'})}
           ></PrimaryButton>
 
           <SeparatorWithText></SeparatorWithText>

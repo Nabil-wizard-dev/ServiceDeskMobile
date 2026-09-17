@@ -1,12 +1,40 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import PrimaryButton from '../../components/buttons/PrimaryButton'
 import StatusBadge from '../../components/layout/StatusBadge'
 import { COLORS } from '../../../constants/constantColors'
 import InfoRow from '../../components/dataDisplay/InfoRow'
 import Feather from 'react-native-vector-icons/Feather';
+import { NavigationContainer, RouteProp, useNavigation, useRoute } from '@react-navigation/native'
+import { TicketDetails } from '../../../domain/usecases/ticket/TicketDetails'
+import { Ticket } from '../../../domain/entities/Ticket'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../../../../App'
+
+type DetailsRouteProp = RouteProp<{ Details: { ticketId?: string } | undefined }, 'Details'>;
 
 const TicketDetailsScreen = () => {
+   // la navigation
+      const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  
+  //recup la route
+ const route = useRoute<DetailsRouteProp>();
+ 
+  // 3. Extraction sécurisée du ticketId (sera string ou undefined)
+  const ticketId = route.params?.ticketId;
+
+  const [ticket, setTicket] = useState<Ticket>();
+
+  const handleGet = async ()=>{
+    if(!ticketId)return;
+
+      const data = await TicketDetails(ticketId);
+      setTicket(data);
+      console.log(data)
+    }
+  useEffect( () => {handleGet()},[])
+
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -16,7 +44,7 @@ const TicketDetailsScreen = () => {
         {/* En-tête ID + Statut */}
         <View style={styles.headerRow}>
           <Text style={styles.ticketId}>TCK-2025-0012</Text>
-          <StatusBadge status="en_cours" />
+          <StatusBadge status="in_progress" />
         </View>
 
         {/* Titre du ticket */}
@@ -51,7 +79,7 @@ const TicketDetailsScreen = () => {
 
       {/* Bouton fixe en bas */}
       <View style={styles.footerContainer}>
-        <PrimaryButton title="Ajouter un commentaire" onPress={() => {}} />
+        <PrimaryButton title="Ajouter un commentaire" onPress={() => navigation.navigate('Comments',{ticketId:ticketId})} />
       </View>
     </SafeAreaView>
   );
