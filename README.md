@@ -1,10 +1,10 @@
-# 📱 ServiceDesk Mobile
+#  ServiceDesk Mobile
 
 Application mobile de gestion des tickets d'assistance et incidents informatiques développée en **React Native** & **TypeScript**. Elle permet aux collaborateurs de déclarer des anomalies, de suivre l'avancement de leurs demandes et d'échanger en direct avec l'équipe technique.
 
 ---
 
-## 🚀 Fonctionnalités Clés
+##  Fonctionnalités Clés
 
 - **Authentification & Profil** : Connexion, inscription et gestion du compte utilisateur.
 - **Gestion des Tickets** : Création de tickets (titre, description, priorité, pièces jointes), consultation de l'historique et suivi du statut (Ouvert, En cours, Résolu, Fermé).
@@ -13,7 +13,7 @@ Application mobile de gestion des tickets d'assistance et incidents informatique
 
 ---
 
-## 🏛️ Architecture (Clean Architecture)
+##  Architecture (Clean Architecture)
 
 Le projet respecte les principes de la **Clean Architecture**, assurant un découpage strict des responsabilités, une testabilité accrue et une indépendance de la logique métier vis-à-vis du framework :
 
@@ -39,7 +39,7 @@ src/
 
 ---
 
-## 🛠️ Stack Technique
+##  Stack Technique
 
 - **Framework** : [React Native](https://reactnative.dev/) (v0.87+)
 - **Langage** : [TypeScript](https://www.typescriptlang.org/)
@@ -49,7 +49,7 @@ src/
 
 ---
 
-## ⚙️ Installation & Démarrage
+##  Installation & Démarrage
 
 ### Prérequis
 - [Node.js](https://nodejs.org/) (version >= 22)
