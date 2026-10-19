@@ -1,14 +1,23 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import TextInputField from '../../components/inputs/TextInputField';
 import IconButton from '../../components/buttons/IconButton';
+import PrimaryButton from '../../components/buttons/PrimaryButton';
 import { COLORS } from '../../../constants/constantColors';
 import Feather from 'react-native-vector-icons/Feather';
 import Avatar from '../../components/dataDisplay/Avatar';
 import { Comment, CreateComment } from '../../../domain/entities/comment';
+import { TicketStatus } from '../../../domain/entities/Ticket';
 import CommentBubble from '../../components/dataDisplay/CommentBubble';
 import { CommentsByTicket } from '../../../domain/usecases/comment/CommentsBuyTicket';
-import { CreateTicket } from '../../../domain/usecases/ticket/CreateTicket';
+import { TicketDetails } from '../../../domain/usecases/ticket/TicketDetails';
 import { AddComment } from '../../../domain/usecases/comment/AddComment';
 import { RouteProp, useRoute } from '@react-navigation/native';
 
@@ -24,21 +33,34 @@ const CommentsScreen = () => {
   // 3. Extraction sécurisée du ticketId (sera string ou undefined)
   const ticketId = route.params?.ticketId;
 
-  //
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState('');
-  const [comment, setComment] = useState('');
+  const [ticketStatus, setTicketStatus] = useState<TicketStatus | null>(null);
+  const [showClosedModal, setShowClosedModal] = useState(false);
 
   useEffect(() => {
-    CommentsByTicket(ticketId as string).then(response => {
-      setComments(response);
-    });
-  }, []);
-
-  //
+    if (ticketId) {
+      CommentsByTicket(ticketId).then(response => {
+        setComments(response);
+      });
+      TicketDetails(ticketId)
+        .then(ticket => {
+          setTicketStatus(ticket.status);
+        })
+        .catch(err => {
+          console.log('[CommentsScreen] Error fetching ticket status:', err);
+        });
+    }
+  }, [ticketId]);
 
   // pour la creation
   const handleAdd = async (newComment: CreateComment) => {
+    // Contrôle du statut du ticket
+    if (ticketStatus === 'closed') {
+      setShowClosedModal(true);
+      return;
+    }
+
     const created = await AddComment(ticketId as string, newComment);
     // Tu ajoutes à la liste existante
     setComments(prev => [created, ...prev]);
@@ -46,6 +68,12 @@ const CommentsScreen = () => {
 
   //pour l'envoie
   const handleSend = () => {
+    // Contrôle du statut avant envoi
+    if (ticketStatus === 'closed') {
+      setShowClosedModal(true);
+      return;
+    }
+
     if (!text.trim()) return;
     handleAdd({
       message: text,
@@ -73,7 +101,7 @@ const CommentsScreen = () => {
         </View>
 
         {comments.map(comment => (
-          <View style={styles.commentRow}>
+          <View key={comment.id} style={styles.commentRow}>
             <Avatar name={comment.employee.fullName} />
             <View style={styles.bubbleWrapper}>
               <CommentBubble
@@ -91,19 +119,56 @@ const CommentsScreen = () => {
         <View style={styles.inputWrapper}>
           <TextInputField
             leftIcon="link"
-            placeholder="Écrire un commentaire..."
+            placeholder={
+              ticketStatus === 'closed'
+                ? 'Ce ticket est fermé (commentaires désactivés)'
+                : 'Écrire un commentaire...'
+            }
             keyboardType="default"
             value={text}
             onChangeText={setText}
             autoCapitalize="sentences"
+            editable={ticketStatus !== 'closed'}
           />
         </View>
         <IconButton
           variant="plain"
-          icon={<Feather name="send" size={20} color={COLORS.primary} />}
+          icon={
+            <Feather
+              name="send"
+              size={20}
+              color={ticketStatus === 'closed' ? COLORS.textMuted : COLORS.primary}
+            />
+          }
           onPress={handleSend}
         />
       </View>
+
+      {/* Modal d'information lorsque le ticket est fermé */}
+      <Modal
+        visible={showClosedModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowClosedModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIconContainer}>
+              <Feather name="lock" size={28} color={COLORS.error} />
+            </View>
+            <Text style={styles.modalTitle}>Ticket fermé</Text>
+            <Text style={styles.modalMessage}>
+              Ce ticket est clôturé. Il n'est plus possible d'y ajouter de nouveaux commentaires.
+            </Text>
+            <View style={{ width: '100%' }}>
+              <PrimaryButton
+                title="Compris"
+                onPress={() => setShowClosedModal(false)}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -140,5 +205,48 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     flex: 1,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  modalIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.errorLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
   },
 });

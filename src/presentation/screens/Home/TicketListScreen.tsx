@@ -14,32 +14,66 @@ const TicketListScreen = () => {
   // la navigation
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const FILTER_TABS: FilterTab[] = [
-    { key: 'tous', label: 'Tous', count: 5 },
-    { key: 'ouverts', label: 'Ouverts', count: 2 },
-    { key: 'en_cours', label: 'En cours', count: 2 },
-    { key: 'resolus', label: 'Résolus', count: 1 },
-  ];
-
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('tous');
 
-  useEffect(()=>{
-    TicketList().then((response)=>{
-      setTickets(response)
-    })
-  },[])
+  useEffect(() => {
+    TicketList().then((response) => {
+      setTickets(response);
+    });
+  }, []);
 
-  // const toDetails =  async(id:string)=>{
-  //   navigation.navigate('Details')
+  // Calcul dynamique des compteurs d'onglets à partir des tickets récupérés
+  const filterTabs: FilterTab[] = [
+    { key: 'tous', label: 'Tous', count: tickets.length },
+    {
+      key: 'ouverts',
+      label: 'Ouverts',
+      count: tickets.filter((t) => t.status === 'open').length,
+    },
+    {
+      key: 'en_cours',
+      label: 'En cours',
+      count: tickets.filter((t) => t.status === 'in_progress').length,
+    },
+    {
+      key: 'resolus',
+      label: 'Résolus',
+      count: tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length,
+    },
+  ];
 
-  // }
+  // Filtrage des tickets selon l'onglet actif et la recherche
+  const filteredTickets = tickets.filter((ticket) => {
+    let matchStatus = true;
+    if (activeFilter === 'ouverts') {
+      matchStatus = ticket.status === 'open';
+    } else if (activeFilter === 'en_cours') {
+      matchStatus = ticket.status === 'in_progress';
+    } else if (activeFilter === 'resolus') {
+      matchStatus = ticket.status === 'resolved' || ticket.status === 'closed';
+    }
 
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState<string | null>(null);
+    const matchSearch =
+      search.trim() === '' ||
+      ticket.subject?.toLowerCase().includes(search.toLowerCase()) ||
+      ticket.reference?.toLowerCase().includes(search.toLowerCase());
 
-  
+    return matchStatus && matchSearch;
+  });
+
+  const formatDate = (dateValue?: Date | string) => {
+    if (!dateValue) return undefined;
+    const d = new Date(dateValue);
+    return isNaN(d.getTime())
+      ? undefined
+      : d.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,7 +87,7 @@ const TicketListScreen = () => {
 
       <View style={styles.tabsContainer}>
         <TabsHeader
-          tabs={FILTER_TABS}
+          tabs={filterTabs}
           activeKey={activeFilter}
           onTabPress={setActiveFilter}
         />
@@ -63,16 +97,22 @@ const TicketListScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       >
-        {tickets.map((ticket) => (
-          <TicketListItem
-            key={ticket.reference}
-            ticketId={ticket.reference}
-            title={ticket.subject}
-            status={ticket.status ?? 'in_progress'}
-            date="24 août 2025 - 10:30"
-            onPress={() => navigation.navigate('Details',{ticketId:ticket.id})}
-          />
-        ))}
+        {filteredTickets.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Aucun ticket trouvé</Text>
+          </View>
+        ) : (
+          filteredTickets.map((ticket) => (
+            <TicketListItem
+              key={ticket.id || ticket.reference}
+              ticketId={ticket.reference}
+              title={ticket.subject}
+              status={ticket.status ?? 'in_progress'}
+              date={formatDate(ticket.createdAt)}
+              onPress={() => navigation.navigate('Details', { ticketId: ticket.id })}
+            />
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -98,5 +138,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 32,
     gap: 12,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#64748B',
   },
 });
